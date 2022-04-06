@@ -1,0 +1,49 @@
+name: Deploy tampa-dev Infrastructure
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    if: "! contains(github.event.commits[0].message, '[no ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - uses: hashicorp/setup-terraform@v1
+
+      - name: Run Terraform
+        id: tf
+        working-directory: ./terraform
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Gather CIDR info
+        id: cidr
+        run: |
+          HOST_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=al2" --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)
+          echo ::set-output name=host_ip::$HOST_IP
+
+      - uses: appleboy/ssh-action@v0.1.4
+        with:
+          key: ${{ secrets.PRIVATE_KEY }}
+          host: ${{ steps.cidr.outputs.host_ip }}
+          username: ec2-user
+          script: |
+            curl -sL https://rpm.nodesource.com/setup_16.x | sudo bash -
+            sudo yum install nodejs -y
+            sudo yum install git -y
+            sudo amazon-linux-extras install nginx1 -y
+            sudo systemctl enable nginx
+            sudo systemctl start nginx
+            git clone https://github.com/CodaBool/tampa-dev.git
+            cd tampa-dev
+            npm ci
+            npm run build
+            sudo cp -TR build /usr/share/nginx/html
