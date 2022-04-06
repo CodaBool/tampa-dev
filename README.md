@@ -14,8 +14,6 @@ ____________________________________
 ### Commands
 `terraform init`
 
-`echo "local_cidr = [\"$(curl checkip.amazonaws.com)/32\"]" > terraform.tfvars`
-
 `terraform plan`
 
 `terraform apply -auto-approve` (30s)
