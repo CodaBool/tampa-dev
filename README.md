@@ -9,7 +9,7 @@ This is repo is part of a tech talk
 ____________________________________
 
 # Presentation Notes
-> HINT: did you make sure to update the repo secret to have public ip of machine
+> HINT: there should be a private key file named key on my flash drive
 
 ### Commands
 `terraform init`
