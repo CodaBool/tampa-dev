@@ -9,7 +9,7 @@ This is repo is part of a tech talk
 ____________________________________
 
 # Presentation Notes
-> HINT: there should be a private key file named key on my flash drive
+> HINT: did you make sure to put the private key file `key` in the terraform folder
 
 ### Commands
 `terraform init`
@@ -17,8 +17,6 @@ ____________________________________
 `terraform plan`
 
 `terraform apply -auto-approve` (30s)
-
-`cd ~`
 
 `HOST_IP=$(terraform output -raw public_ip)`
 
